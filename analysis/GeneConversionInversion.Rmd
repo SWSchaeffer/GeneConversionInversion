@@ -1,0 +1,196 @@
+---
+title: "GeneConversionInversion"
+author: "SWSchaeffer"
+date: "2020-10-03"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Overview
+
+```{perl, Concatenate DnaSP Gene Conversion Data, engine.path = 'C:\\perl64\\bin\\perl.exe'}
+#Extract DNASP Gene Conversion
+#
+#Extracts the output from the Analysis: Gene Conversion implementation of the Betran et al. (1997) analysis
+#
+#Written by Stephen W. Schaeffer
+#Date: 7 November 2018
+#
+my($file,$filein,$fileout,$fileinp,$filec,$inputID,$regi,$analID);
+#
+#$file    - Input file name from the file of file names (fof)
+#$filein  - File name of the text file with the DNASP output
+#$fileout - 
+#$fileinp - File name of the individual DnaSP Gene Conversion pairwise comparison
+#$filec   - File name from line 8 within the DnaSP Gene Conversion file that was used to generate
+#           $fileinp, which has the subregion [01a-14h]
+#$inputID - "Reg_Arr1_Arr2" from the input file name
+#$analID  - "Reg_Arr1_Arr2" from within the analysis file
+#
+#
+my ($i,$line,@GCtsites,$GCtsites,@GCpop1,$GCpop1,@GCp1sam,$GCp1sam,@GCpop2,$GCpop2,@GCp2sam,$GCp2sam);
+my (@GCNo,$GCNo,@GCint,$GCint,@GCstr,$GCstr,@GCcoor,$GCcoor,@GClen,$GClen);
+my (@GCpsi,$GCpsi,$GCtlen,@GCsites,$GCsites,@GCSiteI,$GCSiteI,$rego,$reg);
+chdir("data");
+open (FILE_LIST, "file_list.fof");
+#
+#OUTPUT1 - GeneConversion_Tracts.tsv
+#is a tab separated values file that lists all gene conversion tracts from
+#all pairwise comparisons of the six gene arrangements. Columns [GC_Event, number of
+#the event; GC_File, filename with the data; GC_Strain, strain with the gene conversion
+#event; GC_Beg, first nucleotide of the gene conversion tract; GC_End, last
+#nucleotide of the gene conversion tract; GC_Len, length of the gene conversion tract]. 
+#
+open(OUTPUT1, ">GeneConversion_Tracts.tsv");
+print OUTPUT1 "GC_Event\tGC_File\tGC_Strain\tGC_Beg\tGC_End\tGC_Len\n";
+#
+#OUTPUT2 - GeneConversion_Stats.tsv
+#is a tab separated values file that lists the statistics for the 15 pairwise
+#comparisons of the six gene arrangements for the 73 regions for a total of 1,095
+#analyses.  Columns [GC_File, filename with the data; GC_Pop1, gene arrangement 1;
+#GC_Pop1_No, number of gene arrangement 1; GC_Pop2, gene arrangement 2; GC_Pop2_No,
+#number of gene arrangement 2; GC_Tract_No, number of gene conversion tracts; GC_Sites,
+#number of informative sites; GC_Psi, mean value of Psi for the informative sites;
+#GC_Phi, mean value of Phi for the observed data].
+#
+open(OUTPUT2, ">GeneConversion_Stats.tsv");
+print OUTPUT2 "GC_File\tGC_Pop1\tGC_Pop1_No\tGC_Pop2\tGC_Pop2_No\tGC_Tract_No\tGC_Sites\tGC_Psi\tGC_Phi\n";
+#
+#OUTPUT3 - GeneConversion_Sites_Regxx.tsv
+#is a tab separated values file that lists the informative sites used in the
+#gene conversion detection analysis. Columns [GC_File, filename with the data; GC_Pop1,
+#gene arrangement 1; GC_Pop2, gene arrangement 2; GC_SiteNo, nucleotide position of the
+#informative site in the data subset; GC_SitePsi, value of Psi for the informative site;
+#GC_TotalSites, total number of nucleotide sites].
+#
+#
+#Output4 - GeneConversion_Sites_Check.tsv
+#is a tab separated values file that lists the name of the file, the name
+#of the Input Data File on line 8, the first arrangement and the second arrangement
+#[GC_File,ContentsGC_File,Arr1,Arr2].
+#This file checks to make sure the name of the file matches with the contents of
+#the file.
+#
+open(OUTPUT4, ">GeneConversion_Check.tsv");
+print OUTPUT4 "Input_File\tAnalysis_File\tCheck\n";
+$rego="00";
+while ($file = <FILE_LIST>) {
+    chop($file);
+    $fileinp=$file;
+    $inputID=substr $fileinp, 15, 9;
+    $reg=substr $file, 15, 2;
+    if($reg ne $rego) {
+        $fileout = join "","GeneConversion_Sites_Reg",$reg, ".tsv";
+        open(OUTPUT3, ">>" ,"$fileout");
+        print OUTPUT3 "GC_File\tGC_Pop1\tGC_Pop2\tGC_SiteNo\tGC_SitePsi\tTotalSites\n";
+        close(OUTPUT3);
+        $rego=$reg
+    }
+     $filein = join "",$file,".txt";
+    open (QUERY, $filein);
+    for($i=0; $i<=7; $i++) {
+        $line=<QUERY>;    
+    }
+    #Line 8 has the filename Chr3_Syn_Reg_xxx.nex where xxx is one subregion from 01a to 14h
+    chop($line);
+    $filec=$line;
+    #regi - the name of the region on the input file [01a-14h]
+    $regi=substr $filec, 38, 3;
+    #Line 9 no data used
+    $line=<QUERY>;
+    #Line 10 has the Total Number of Sites
+    $line=<QUERY>;
+    chop($line);
+    #$GCtsites[1] - Total Number of Sites 
+    @GCtsites = split(':', $line);
+    #Line 11 no data used
+    $line=<QUERY>;    
+    #Line 12 has Population 1 Name
+    $line=<QUERY>;    
+    chop($line);
+    #$GCpop1[1] - Population 1 Name 
+    @GCpop1 = split(': ', $line);
+    #Line 13 has Population 1 Sample Size
+    $line=<QUERY>;
+    chop($line);
+    #$GCp1sam[1] - Population 1 Sample Size 
+    @GCp1sam = split(': ', $line);
+    #Line 14 has Population 2 Name
+    $line=<QUERY>;
+    chop($line);
+    #$GCpop2[1] - Population 2 Name
+    @GCpop2 = split(': ', $line);
+    #Line 15 has Population 2 Sample Size
+    $line=<QUERY>;
+    chop($line);
+    #$GCp2sam[1] - Population 2 Sample Size  
+    @GCp2sam = split(': ', $line);
+    $analID=join "",$regi,"_",$GCpop1[1],"_",$GCpop2[1];
+    if($inputID eq $analID){
+      print OUTPUT4 "$inputID\t$analID\tMatch\n";
+    }
+    else {
+      print OUTPUT4 "$inputID\t$analID\tNo Match\n";
+    }
+    #Line 16 no data used
+    $line=<QUERY>;
+    #Line 17 has the Number of Gene Conversion Tracts
+    $line=<QUERY>;
+    chop($line);
+    #$GCNo[1] - Number of Gene Conversion Tracts 
+    @GCNo = split(':', $line);
+    #Read the conversion version tract information for the $GCNo[] Gene Conversion Tracts
+    for($i=1; $i<=$GCNo[1]; $i++) {
+        $line=<QUERY>;
+        chop($line);
+        @GCint = split(':', $line);
+        #$GCstr[0] - Strain name
+        @GCstr = split(' ', $GCint[1]);
+        #$GCcoor[0] - Beginning coordinate
+        #$GCcoor[1] - End coordinate
+        @GCcoor = split('-', $GCint[2]);
+        $line=<QUERY>;
+        chop($line);
+        #$GClen[1] - Gene conversion tract length
+        @GClen = split(':', $line);
+        print OUTPUT1 "$i\t$file\t$GCstr[0]\t$GCcoor[0]\t$GCcoor[1]\t$GClen[1]\n";
+        }
+    $line=<QUERY>;
+    #Line 17 + (2 x $GCNo[]) + 1 has the estimate of Psi
+    $line=<QUERY>;
+    chop($line);
+    #$GCpsi[1] - Psi or probability of the site being informative
+    @GCpsi = split(':', $line);
+    #$GCtlen - Gene conversion tract length
+    $GCtlen =1/$GCpsi[1];
+    #Line 17 + (2 x $GCNo[]) + 2 has the number of informative sites
+    $line=<QUERY>;
+    chop($line);
+    #$GCsites[1] - Number of informative sites
+    @GCsites = split(':', $line);
+    print OUTPUT2 "$file\t";
+    print OUTPUT2 "$GCpop1[1]\t$GCp1sam[1]\t";
+    print OUTPUT2 "$GCpop2[1]\t$GCp2sam[1]\t";
+    print OUTPUT2 "$GCNo[1]\t$GCsites[1]\t$GCpsi[1]\t$GCtlen\n";
+    for($i=1; $i<=5; $i++) {
+        $line=<QUERY>     
+        }
+    $reg=substr $file, 15, 2;
+    $fileout = join "","GeneConversion_Sites_Reg",$reg, ".tsv";
+    open(OUTPUT3, ">>" ,"$fileout");
+    for($i=1; $i<=$GCsites[1]; $i++) {
+        $line=<QUERY>;
+        chop($line);
+        #$GCSiteI[0] - Site number
+        #$GCSiteI[1] - Site Psi
+        @GCSiteI = split(' ', $line);
+            print OUTPUT3 "$file\t";
+            print OUTPUT3 "$GCpop1[1]\t$GCpop2[1]\t";
+            print OUTPUT3 "$GCSiteI[0]\t$GCSiteI[1]\t";
+            print OUTPUT3 "$GCtsites[1]\n";
+    }
+    close(OUTPUT3);
+}
+```
+
