@@ -12,7 +12,7 @@ navbar:
   right:
   - icon: fa-github
     text: Source code
-    href: https://github.com/GeneConversionInversion/GeneConversionInversion
+    href: https://github.com/SWSchaeffer/GeneConversionInversion
 output:
   workflowr::wflow_html:
     toc: yes
