@@ -9,9 +9,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="SWSchaeffer" />
 
+<meta name="date" content="2020-10-03" />
 
-<title>Home</title>
+<title>GeneConversionInversion</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -19,6 +21,9 @@
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -258,6 +263,69 @@ $(document).ready(function () {
 
 
 
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
 
 </head>
 
@@ -265,6 +333,16 @@ $(document).ready(function () {
 
 
 <div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -308,7 +386,9 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Home</h1>
+<h1 class="title toc-ignore">GeneConversionInversion</h1>
+<h4 class="author">SWSchaeffer</h4>
+<h4 class="date">2020-10-03</h4>
 
 </div>
 
@@ -336,7 +416,7 @@ $(document).ready(function () {
 <strong>Last updated:</strong> 2020-10-03
 </p>
 <p>
-<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
 </p>
 <p>
 <strong>Knit directory:</strong> <code>GeneConversionInversion/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
@@ -358,6 +438,66 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
 <div class="panel-body">
 <p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20201003code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20201003)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20201003code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20201003)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
 </div>
 </div>
 </div>
@@ -1491,7 +1631,7 @@ Note that any generated files, e.g. HTML, png, CSS, etc., are not included in t
 <div id="versions" class="tab-pane fade">
 
 <p>
-These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/index.Rmd</code>) and HTML (<code>docs/index.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/GeneConversionInversion.Rmd</code>) and HTML (<code>docs/GeneConversionInversion.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
 </p>
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
@@ -1517,27 +1657,10 @@ Message
 <tbody>
 <tr>
 <td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/SWSchaeffer/GeneConversionInversion/3f93af4927d0cc1a48410411374de4e6102e582d/docs/index.html" target="_blank">3f93af4</a>
-</td>
-<td>
-SWSchaeffer
-</td>
-<td>
-2020-10-03
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
 Rmd
 </td>
 <td>
-<a href="https://github.com/SWSchaeffer/GeneConversionInversion/blob/de8405d6a46b6bbbea7117681d2372555b028c98/analysis/index.Rmd" target="_blank">de8405d</a>
+<a href="https://github.com/SWSchaeffer/GeneConversionInversion/blob/3428e0929da06d7feb79bc7c01b7bfe178cf0092/analysis/GeneConversionInversion.Rmd" target="_blank">3428e09</a>
 </td>
 <td>
 SWSchaeffer
@@ -1546,7 +1669,7 @@ SWSchaeffer
 2020-10-03
 </td>
 <td>
-Start workflowr project.
+Publish the initial files for GeneConversionIversion
 </td>
 </tr>
 </tbody>
@@ -1556,7 +1679,226 @@ Start workflowr project.
 </div>
 </div>
 </div>
-<p>Welcome to my research website.</p>
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<pre class="perl"><code>#Extract DNASP Gene Conversion
+#
+#Extracts the output from the Analysis: Gene Conversion implementation of the Betran et al. (1997) analysis
+#
+#Written by Stephen W. Schaeffer
+#Date: 7 November 2018
+#
+my($file,$filein,$fileout,$fileinp,$filec,$inputID,$regi,$analID);
+#
+#$file    - Input file name from the file of file names (fof)
+#$filein  - File name of the text file with the DNASP output
+#$fileout - 
+#$fileinp - File name of the individual DnaSP Gene Conversion pairwise comparison
+#$filec   - File name from line 8 within the DnaSP Gene Conversion file that was used to generate
+#           $fileinp, which has the subregion [01a-14h]
+#$inputID - &quot;Reg_Arr1_Arr2&quot; from the input file name
+#$analID  - &quot;Reg_Arr1_Arr2&quot; from within the analysis file
+#
+#
+my ($i,$line,@GCtsites,$GCtsites,@GCpop1,$GCpop1,@GCp1sam,$GCp1sam,@GCpop2,$GCpop2,@GCp2sam,$GCp2sam);
+my (@GCNo,$GCNo,@GCint,$GCint,@GCstr,$GCstr,@GCcoor,$GCcoor,@GClen,$GClen);
+my (@GCpsi,$GCpsi,$GCtlen,@GCsites,$GCsites,@GCSiteI,$GCSiteI,$rego,$reg);
+chdir(&quot;data&quot;);
+open (FILE_LIST, &quot;file_list.fof&quot;);
+#
+#OUTPUT1 - GeneConversion_Tracts.tsv
+#is a tab separated values file that lists all gene conversion tracts from
+#all pairwise comparisons of the six gene arrangements. Columns [GC_Event, number of
+#the event; GC_File, filename with the data; GC_Strain, strain with the gene conversion
+#event; GC_Beg, first nucleotide of the gene conversion tract; GC_End, last
+#nucleotide of the gene conversion tract; GC_Len, length of the gene conversion tract]. 
+#
+open(OUTPUT1, &quot;&gt;GeneConversion_Tracts.tsv&quot;);
+print OUTPUT1 &quot;GC_Event\tGC_File\tGC_Strain\tGC_Beg\tGC_End\tGC_Len\n&quot;;
+#
+#OUTPUT2 - GeneConversion_Stats.tsv
+#is a tab separated values file that lists the statistics for the 15 pairwise
+#comparisons of the six gene arrangements for the 73 regions for a total of 1,095
+#analyses.  Columns [GC_File, filename with the data; GC_Pop1, gene arrangement 1;
+#GC_Pop1_No, number of gene arrangement 1; GC_Pop2, gene arrangement 2; GC_Pop2_No,
+#number of gene arrangement 2; GC_Tract_No, number of gene conversion tracts; GC_Sites,
+#number of informative sites; GC_Psi, mean value of Psi for the informative sites;
+#GC_Phi, mean value of Phi for the observed data].
+#
+open(OUTPUT2, &quot;&gt;GeneConversion_Stats.tsv&quot;);
+print OUTPUT2 &quot;GC_File\tGC_Pop1\tGC_Pop1_No\tGC_Pop2\tGC_Pop2_No\tGC_Tract_No\tGC_Sites\tGC_Psi\tGC_Phi\n&quot;;
+#
+#OUTPUT3 - GeneConversion_Sites_Regxx.tsv
+#is a tab separated values file that lists the informative sites used in the
+#gene conversion detection analysis. Columns [GC_File, filename with the data; GC_Pop1,
+#gene arrangement 1; GC_Pop2, gene arrangement 2; GC_SiteNo, nucleotide position of the
+#informative site in the data subset; GC_SitePsi, value of Psi for the informative site;
+#GC_TotalSites, total number of nucleotide sites].
+#
+#
+#Output4 - GeneConversion_Sites_Check.tsv
+#is a tab separated values file that lists the name of the file, the name
+#of the Input Data File on line 8, the first arrangement and the second arrangement
+#[GC_File,ContentsGC_File,Arr1,Arr2].
+#This file checks to make sure the name of the file matches with the contents of
+#the file.
+#
+open(OUTPUT4, &quot;&gt;GeneConversion_Check.tsv&quot;);
+print OUTPUT4 &quot;Input_File\tAnalysis_File\tCheck\n&quot;;
+$rego=&quot;00&quot;;
+while ($file = &lt;FILE_LIST&gt;) {
+    chop($file);
+    $fileinp=$file;
+    $inputID=substr $fileinp, 15, 9;
+    $reg=substr $file, 15, 2;
+    if($reg ne $rego) {
+        $fileout = join &quot;&quot;,&quot;GeneConversion_Sites_Reg&quot;,$reg, &quot;.tsv&quot;;
+        open(OUTPUT3, &quot;&gt;&gt;&quot; ,&quot;$fileout&quot;);
+        print OUTPUT3 &quot;GC_File\tGC_Pop1\tGC_Pop2\tGC_SiteNo\tGC_SitePsi\tTotalSites\n&quot;;
+        close(OUTPUT3);
+        $rego=$reg
+    }
+     $filein = join &quot;&quot;,$file,&quot;.txt&quot;;
+    open (QUERY, $filein);
+    for($i=0; $i&lt;=7; $i++) {
+        $line=&lt;QUERY&gt;;    
+    }
+    #Line 8 has the filename Chr3_Syn_Reg_xxx.nex where xxx is one subregion from 01a to 14h
+    chop($line);
+    $filec=$line;
+    #regi - the name of the region on the input file [01a-14h]
+    $regi=substr $filec, 38, 3;
+    #Line 9 no data used
+    $line=&lt;QUERY&gt;;
+    #Line 10 has the Total Number of Sites
+    $line=&lt;QUERY&gt;;
+    chop($line);
+    #$GCtsites[1] - Total Number of Sites 
+    @GCtsites = split(&#39;:&#39;, $line);
+    #Line 11 no data used
+    $line=&lt;QUERY&gt;;    
+    #Line 12 has Population 1 Name
+    $line=&lt;QUERY&gt;;    
+    chop($line);
+    #$GCpop1[1] - Population 1 Name 
+    @GCpop1 = split(&#39;: &#39;, $line);
+    #Line 13 has Population 1 Sample Size
+    $line=&lt;QUERY&gt;;
+    chop($line);
+    #$GCp1sam[1] - Population 1 Sample Size 
+    @GCp1sam = split(&#39;: &#39;, $line);
+    #Line 14 has Population 2 Name
+    $line=&lt;QUERY&gt;;
+    chop($line);
+    #$GCpop2[1] - Population 2 Name
+    @GCpop2 = split(&#39;: &#39;, $line);
+    #Line 15 has Population 2 Sample Size
+    $line=&lt;QUERY&gt;;
+    chop($line);
+    #$GCp2sam[1] - Population 2 Sample Size  
+    @GCp2sam = split(&#39;: &#39;, $line);
+    $analID=join &quot;&quot;,$regi,&quot;_&quot;,$GCpop1[1],&quot;_&quot;,$GCpop2[1];
+    if($inputID eq $analID){
+      print OUTPUT4 &quot;$inputID\t$analID\tMatch\n&quot;;
+    }
+    else {
+      print OUTPUT4 &quot;$inputID\t$analID\tNo Match\n&quot;;
+    }
+    #Line 16 no data used
+    $line=&lt;QUERY&gt;;
+    #Line 17 has the Number of Gene Conversion Tracts
+    $line=&lt;QUERY&gt;;
+    chop($line);
+    #$GCNo[1] - Number of Gene Conversion Tracts 
+    @GCNo = split(&#39;:&#39;, $line);
+    #Read the conversion version tract information for the $GCNo[] Gene Conversion Tracts
+    for($i=1; $i&lt;=$GCNo[1]; $i++) {
+        $line=&lt;QUERY&gt;;
+        chop($line);
+        @GCint = split(&#39;:&#39;, $line);
+        #$GCstr[0] - Strain name
+        @GCstr = split(&#39; &#39;, $GCint[1]);
+        #$GCcoor[0] - Beginning coordinate
+        #$GCcoor[1] - End coordinate
+        @GCcoor = split(&#39;-&#39;, $GCint[2]);
+        $line=&lt;QUERY&gt;;
+        chop($line);
+        #$GClen[1] - Gene conversion tract length
+        @GClen = split(&#39;:&#39;, $line);
+        print OUTPUT1 &quot;$i\t$file\t$GCstr[0]\t$GCcoor[0]\t$GCcoor[1]\t$GClen[1]\n&quot;;
+        }
+    $line=&lt;QUERY&gt;;
+    #Line 17 + (2 x $GCNo[]) + 1 has the estimate of Psi
+    $line=&lt;QUERY&gt;;
+    chop($line);
+    #$GCpsi[1] - Psi or probability of the site being informative
+    @GCpsi = split(&#39;:&#39;, $line);
+    #$GCtlen - Gene conversion tract length
+    $GCtlen =1/$GCpsi[1];
+    #Line 17 + (2 x $GCNo[]) + 2 has the number of informative sites
+    $line=&lt;QUERY&gt;;
+    chop($line);
+    #$GCsites[1] - Number of informative sites
+    @GCsites = split(&#39;:&#39;, $line);
+    print OUTPUT2 &quot;$file\t&quot;;
+    print OUTPUT2 &quot;$GCpop1[1]\t$GCp1sam[1]\t&quot;;
+    print OUTPUT2 &quot;$GCpop2[1]\t$GCp2sam[1]\t&quot;;
+    print OUTPUT2 &quot;$GCNo[1]\t$GCsites[1]\t$GCpsi[1]\t$GCtlen\n&quot;;
+    for($i=1; $i&lt;=5; $i++) {
+        $line=&lt;QUERY&gt;     
+        }
+    $reg=substr $file, 15, 2;
+    $fileout = join &quot;&quot;,&quot;GeneConversion_Sites_Reg&quot;,$reg, &quot;.tsv&quot;;
+    open(OUTPUT3, &quot;&gt;&gt;&quot; ,&quot;$fileout&quot;);
+    for($i=1; $i&lt;=$GCsites[1]; $i++) {
+        $line=&lt;QUERY&gt;;
+        chop($line);
+        #$GCSiteI[0] - Site number
+        #$GCSiteI[1] - Site Psi
+        @GCSiteI = split(&#39; &#39;, $line);
+            print OUTPUT3 &quot;$file\t&quot;;
+            print OUTPUT3 &quot;$GCpop1[1]\t$GCpop2[1]\t&quot;;
+            print OUTPUT3 &quot;$GCSiteI[0]\t$GCSiteI[1]\t&quot;;
+            print OUTPUT3 &quot;$GCtsites[1]\n&quot;;
+    }
+    close(OUTPUT3);
+}</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.0.2 (2020-06-22)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 10 x64 (build 18363)
+
+Matrix products: default
+
+locale:
+[1] LC_COLLATE=English_United States.1252 
+[2] LC_CTYPE=English_United States.1252   
+[3] LC_MONETARY=English_United States.1252
+[4] LC_NUMERIC=C                          
+[5] LC_TIME=English_United States.1252    
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] workflowr_1.6.2
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.5       rprojroot_1.3-2  digest_0.6.25    later_1.1.0.1   
+ [5] R6_2.4.1         backports_1.1.10 git2r_0.27.1     magrittr_1.5    
+ [9] evaluate_0.14    stringi_1.5.3    rlang_0.4.7      fs_1.5.0        
+[13] promises_1.1.1   whisker_0.4      rmarkdown_2.3    tools_4.0.2     
+[17] stringr_1.4.0    glue_1.4.2       httpuv_1.5.4     xfun_0.17       
+[21] yaml_2.2.1       compiler_4.0.2   htmltools_0.5.0  knitr_1.30      </code></pre>
+</div>
+</div>
 
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
@@ -1572,6 +1914,8 @@ footer is added to webpages before the MathJax javascript. -->
 </script>
 
 
+</div>
+</div>
 
 </div>
 
@@ -1604,6 +1948,32 @@ $(document).ready(function () {
 
 <!-- code folding -->
 
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
