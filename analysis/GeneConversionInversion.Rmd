@@ -8,6 +8,190 @@ editor_options:
 ---
 
 ## Overview
+## Syntenic Block Rearrangement Analysis
+This code determines the order of the 73 syntenic subregions in the different arrangements.  
+Input Files in the data folder   
+1. AR_Syntenic_Regions.txt - region order in the reference genome  
+2. ST_Ord.txt - subregion order in ST relative to AR  
+3. PP_Ord.txt - subregion order in PP relative to ST  
+4. HY_Ord.txt - subregion order in HY relative to ST  
+5. SC_Ord.txt - subregion order in SC relative to HY  
+6. CU_Ord.txt - subregion order in CU relative to SC  
+7. CH_Ord.txt - subregion order in CH relative to SC  
+8. TL_Ord.txt - subregion order in TL relative to SC  
+  
+Output Files in output folder  
+1. AR_coordinates.csv - subregion, beginning nucleotide coordinate, end nucleotide coordinate  
+2. ST_coordinates.csv - subregion, beginning nucleotide coordinate, end nucleotide coordinate  
+3. PP_coordinates.csv - subregion, beginning nucleotide coordinate, end nucleotide coordinate  
+1. HY_coordinates.csv - subregion, beginning nucleotide coordinate, end nucleotide coordinate  
+1. SC_coordinates.csv - subregion, beginning nucleotide coordinate, end nucleotide coordinate  
+1. CU_coordinates.csv - subregion, beginning nucleotide coordinate, end nucleotide coordinate  
+1. CH_coordinates.csv - subregion, beginning nucleotide coordinate, end nucleotide coordinate  
+1. TL_coordinates.csv - subregion, beginning nucleotide coordinate, end nucleotide coordinate  
+
+```{r, Syntenic Blocks}
+#AR is a table with columns V1-V5, where
+#V1 - subregion = AR_SReg
+#V2 - beginning cytogenetic region
+#V3 - end cytogenetic region
+#V4 - beginning nucleotide coordinate in the Arrowhead (AR) arrangement = AR_Beg
+#v5 - end nucleotide coordinate in the Arrowhead (AR) arrangement = AR_End
+AR <- read.delim("data/AR_Syntenic_Regions.txt", header = FALSE, sep = "\t")
+AR_SReg <-AR$V1
+AR_Beg <- AR$V4
+AR_End <- AR$V5
+AR_Data <- cbind(AR_SReg, AR_Beg, AR_End)
+write.csv(AR_Data, file ="output/AR_Coordinates.csv")
+#AR_lenreg - length of the subregion in the Arrowhead (AR) arrangement
+AR_lenreg <- AR_End - AR_Beg +1
+#nsreg - number of subregions
+nsreg <- nrow(AR)
+#
+#Standard Arrangement
+#
+#Obtain the coordinates of the subregions in the Standard (ST) arrangement
+#ST_Ord -  order of the subregions in the Standard (ST) arrangement
+#ST_Beg -  beginning nucleotide coordinate in the Standard (ST) arrangement
+#ST_End -  end nucleotide coordinate in the Standard (ST) arrangement
+#ST_SReg - subregion in the Standard (ST) arrangement
+ST_Ord <- scan("data/ST_Ord.txt")
+ST_Beg <- c(1)
+ST_End <- c(AR_End[1])
+ST_SReg <- c(AR_SReg[1])
+for (i in 2:nsreg) {
+  ST_Beg[i] <- ST_End[i-1]+1
+  ST_End[i] <- ST_End[i-1]+AR_lenreg[ST_Ord[i]]
+  ST_SReg[i] <- c(AR_SReg[ST_Ord[i]])
+}
+ST_lenreg <- ST_End - ST_Beg +1
+ST_Data <- cbind(ST_SReg, ST_Beg, ST_End)
+write.csv(ST_Data, file ="output/ST_Coordinates.csv")
+#
+#Pikes Peak Arrangement
+#
+#Obtain the coordinates of the subregions in the Pikes Peak (PP) arrangement
+#PP_Ord -  order of the subregions in the Pikes Peak (PP) arrangement
+#PP_Beg -  beginning nucleotide coordinate in the Pikes Peak (PP) arrangement
+#PP_End -  end nucleotide coordinate in the Pikes Peak (PP) arrangement
+#PP_SReg - subregion in the Pikes Peak (P) arrangement
+PP_Ord <- scan("data/PP_Ord.txt")
+PP_Beg <- c(1)
+PP_End <- c(ST_End[1])
+PP_SReg <- c(ST_SReg[1])
+for (i in 2:nsreg) {
+  PP_Beg[i] <- PP_End[i-1]+1
+  PP_End[i] <- PP_End[i-1]+ST_lenreg[PP_Ord[i]]
+  PP_SReg[i] <- c(ST_SReg[PP_Ord[i]])
+}
+PP_Data <- cbind(PP_SReg, PP_Beg, PP_End)
+write.csv(PP_Data, file ="output/PP_Coordinates.csv")
+#
+#Hypothetical Arrangement - Ancestral Arrangement
+#
+#Obtain the coordinates of the subregions in the Hypothetical (HY) arrangement
+#HY_Ord -  order of the subregions in the Hypothetical (HY) arrangement
+#HY_Beg -  beginning nucleotide coordinate in the Hypothetical (HY) arrangement
+#HY_End -  end nucleotide coordinate in the Hypothetical (HY) arrangement
+#HY_SReg - subregion in the Hypothetical (HY) arrangement
+HY_Ord <- scan("data/HY_Ord.txt")
+HY_Beg <- c(1)
+HY_End <- c(ST_End[1])
+HY_SReg <- c(ST_SReg[1])
+for (i in 2:nsreg) {
+  HY_Beg[i] <- HY_End[i-1]+1
+  HY_End[i] <- HY_End[i-1]+ST_lenreg[HY_Ord[i]]
+  HY_SReg[i] <- c(ST_SReg[HY_Ord[i]])
+}
+HY_lenreg <- HY_End - HY_Beg +1
+HY_Data <- cbind(HY_SReg, HY_Beg, HY_End)
+write.csv(HY_Data, file ="output/HY_Coordinates.csv")
+#
+#Santa Cruz Arrangement
+#
+#Obtain the coordinates of the subregions in the Santa Cruz (SC) arrangement
+#SC_Ord -  order of the subregions in the Santa Cruz (SC) arrangement
+#SC_Beg -  beginning nucleotide coordinate in the Santa Cruz (SC) arrangement
+#SC_End -  end nucleotide coordinate in the Santa Cruz (SC) arrangement
+#SC_SReg - subregion in the Santa Cruz (SC) arrangement
+SC_Ord <- scan("data/SC_Ord.txt")
+SC_Beg <- c(1)
+SC_End <- c(HY_End[1])
+SC_SReg <- c(HY_SReg[1])
+for (i in 2:nsreg) {
+  SC_Beg[i] <- SC_End[i-1]+1
+  SC_End[i] <- SC_End[i-1]+HY_lenreg[SC_Ord[i]]
+  SC_SReg[i] <- c(HY_SReg[SC_Ord[i]])
+}
+SC_lenreg <- SC_End - SC_Beg +1
+SC_Data <- cbind(SC_SReg, SC_Beg, SC_End)
+write.csv(SC_Data, file ="output/SC_Coordinates.csv")
+#
+#Cuernavaca Arrangement
+#
+#Obtain the coordinates of the subregions in the Cuernavaca (CU) arrangement
+#CU_Ord -  order of the subregions in the Cuernavaca (CU) arrangement
+#CU_Beg -  beginning nucleotide coordinate in the Cuernavaca (CU) arrangement
+#CU_End -  end nucleotide coordinate in the Cuernavaca (CU) arrangement
+#CU_SReg - subregion in the Cuernavaca (CU) arrangement
+CU_Ord <- scan("data/CU_Ord.txt")
+CU_Beg <- c(1)
+CU_End <- c(SC_End[1])
+CU_SReg <- c(SC_SReg[1])
+for (i in 2:nsreg) {
+  CU_Beg[i] <- CU_End[i-1]+1
+  CU_End[i] <- CU_End[i-1]+SC_lenreg[CU_Ord[i]]
+  CU_SReg[i] <- c(SC_SReg[CU_Ord[i]])
+}
+CU_Data <- cbind(CU_SReg, CU_Beg, CU_End)
+write.csv(CU_Data, file ="output/CU_Coordinates.csv")
+#
+#Chiricahua Arrangement
+#
+#Obtain the coordinates of the subregions in the Chiricahua (CH) arrangement
+#CH_Ord -  order of the subregions in the Chiricahua (CH) arrangement
+#CH_Beg -  beginning nucleotide coordinate in the Chiricahua (CH) arrangement
+#CH_End -  end nucleotide coordinate in the Chiricahua (CH) arrangement
+#CH_SReg - subregion in the Chiricahua (CH) arrangement
+CH_Ord <- scan("data/CH_Ord.txt")
+CH_Beg <- c(1)
+CH_End <- c(SC_End[1])
+CH_SReg <- c(SC_SReg[1])
+for (i in 2:nsreg) {
+  CH_Beg[i] <- CH_End[i-1]+1
+  CH_End[i] <- CH_End[i-1]+SC_lenreg[CH_Ord[i]]
+  CH_SReg[i] <- c(SC_SReg[CH_Ord[i]])
+}
+CH_Data <- cbind(CH_SReg, CH_Beg, CH_End)
+write.csv(CH_Data, file ="output/CH_Coordinates.csv")
+#
+#Tree Line Arrangement
+#
+#Obtain the coordinates of the subregions in the Tree Line (TL) arrangement
+#TL_Ord -  order of the subregions in the Tree Line (TL) arrangement
+#TL_Beg -  beginning nucleotide coordinate in the Tree Line (TL) arrangement
+#TL_End -  end nucleotide coordinate in the Tree Line (TL) arrangement
+#TL_SReg - subregion in the Tree Line (TL) arrangement
+TL_Ord <- scan("data/TL_Ord.txt")
+TL_Beg <- c(1)
+TL_End <- c(SC_End[1])
+TL_SReg <- c(SC_SReg[1])
+for (i in 2:nsreg) {
+  TL_Beg[i] <- TL_End[i-1]+1
+  TL_End[i] <- TL_End[i-1]+SC_lenreg[TL_Ord[i]]
+  TL_SReg[i] <- c(SC_SReg[TL_Ord[i]])
+}
+TL_Data <- cbind(TL_SReg, TL_Beg, TL_End)
+write.csv(TL_Data, file ="output/TL_Coordinates.csv")
+```
+
+
+## Concatenate DnaSP Gene Conversion Data
+This PERL script takes data from DnaSP output from the Gene Conversion analysis and creates:  
+1. GeneConversion_Tracts.tsv - a table separated value file with conversion tracts  
+2. GeneConversion_Stats.tsv - a table separated value file with summary statistics on conversion tracts  
+3. GeneConversion_Sites_Regxx.tsv for the xx regions [1-14]  
+4. GeneConversion_Check.tsv - a table separated value file that checks the input file name matches the contents of the file  
 
 ```{perl, Concatenate DnaSP Gene Conversion Data, engine.path = 'C:\\perl64\\bin\\perl.exe'}
 #Extract DNASP Gene Conversion
@@ -65,10 +249,10 @@ print OUTPUT2 "GC_File\tGC_Pop1\tGC_Pop1_No\tGC_Pop2\tGC_Pop2_No\tGC_Tract_No\tG
 #GC_TotalSites, total number of nucleotide sites].
 #
 #
-#Output4 - GeneConversion_Sites_Check.tsv
+#Output4 - GeneConversion_Check.tsv
 #is a tab separated values file that lists the name of the file, the name
 #of the Input Data File on line 8, the first arrangement and the second arrangement
-#[GC_File,ContentsGC_File,Arr1,Arr2].
+#[Input_File,Analysis_File,Check], where Input_File and Analysis_File are of the form "Subregion_ARR1_ARR2"
 #This file checks to make sure the name of the file matches with the contents of
 #the file.
 #
