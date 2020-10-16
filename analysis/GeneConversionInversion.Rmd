@@ -8,9 +8,22 @@ editor_options:
 ---
 
 ## Overview
+## NG Convert Fasta to Nexus  
+Source: Fortran, NG_Convert_Fasta_to_Nexus.f in code folder  
+This fortran program converts a set of aligned sequences in Fasta format into Nexus format
+for import into DnaSP for inference of gene conversion tracts.  
+
+Input files in the data folder  
+1. Syntenic_Regions.txt, is a list of 73 regions across the third chromosome of Drosophila pseudoobscura with the name of the region, the beginning and end of the cytogenetic region, and the beginning and end coordinate in the version 3.2 assembly.  
+2. snp_Dpse_All.fof, is a list of the 55 fasta sequences for chromosome three of 54 D. pseudoobscura strains and the outgroup strain D. miranda.  Each sequence has the label “X_Chr3.fas” where X is the strain name.  
+
+Output file in the data folder  
+1. Chr3_Syn_Reg_xxx.nex, is the name of the output nexus file where xxx is the name of the subregion [01a-14h].  
+
 ## Syntenic Block Rearrangement Analysis
-This code determines the order of the 73 syntenic subregions in the different arrangements.  
-Input Files in the data folder   
+This R code chunk determines the order of the 73 syntenic subregions in the different arrangements.  
+
+Input files in the data folder   
 1. AR_Syntenic_Regions.txt - region order in the reference genome  
 2. ST_Ord.txt - subregion order in ST relative to AR  
 3. PP_Ord.txt - subregion order in PP relative to ST  
@@ -20,7 +33,7 @@ Input Files in the data folder
 7. CH_Ord.txt - subregion order in CH relative to SC  
 8. TL_Ord.txt - subregion order in TL relative to SC  
   
-Output Files in output folder  
+Output files in output folder  
 1. AR_coordinates.csv - subregion, beginning nucleotide coordinate, end nucleotide coordinate  
 2. ST_coordinates.csv - subregion, beginning nucleotide coordinate, end nucleotide coordinate  
 3. PP_coordinates.csv - subregion, beginning nucleotide coordinate, end nucleotide coordinate  
@@ -38,15 +51,23 @@ Output Files in output folder
 #V4 - beginning nucleotide coordinate in the Arrowhead (AR) arrangement = AR_Beg
 #v5 - end nucleotide coordinate in the Arrowhead (AR) arrangement = AR_End
 AR <- read.delim("data/AR_Syntenic_Regions.txt", header = FALSE, sep = "\t")
+#nsreg - number of subregions
+nsreg <- nrow(AR)
 AR_SReg <-AR$V1
 AR_Beg <- AR$V4
 AR_End <- AR$V5
-AR_Data <- cbind(AR_SReg, AR_Beg, AR_End)
+AR_Ori <- rep(1, nsreg)
+AR_Data <- cbind(AR_SReg, AR_Beg, AR_End, AR_Ori)
 write.csv(AR_Data, file ="output/AR_Coordinates.csv")
+AR_Coor <- read.table("output/AR_Coordinates.csv", header = TRUE, sep =",")
+AR_Coor$Reg <- substr(AR_SReg, 1, 2)
+AR_Min <-aggregate(AR_Coor$AR_Beg, by =list(AR_Coor$Reg), min)
+AR_Max <-aggregate(AR_Coor$AR_End, by =list(AR_Coor$Reg), max)
+AR_MinMax <- cbind(AR_Min$x, AR_Max$x)
+colnames(AR_MinMax) <- c("Min", "Max")
+write.table(AR_MinMax, file ="data/AR_MinMax.tsv", row.names = FALSE, sep = "\t")
 #AR_lenreg - length of the subregion in the Arrowhead (AR) arrangement
 AR_lenreg <- AR_End - AR_Beg +1
-#nsreg - number of subregions
-nsreg <- nrow(AR)
 #
 #Standard Arrangement
 #
@@ -64,8 +85,12 @@ for (i in 2:nsreg) {
   ST_End[i] <- ST_End[i-1]+AR_lenreg[ST_Ord[i]]
   ST_SReg[i] <- c(AR_SReg[ST_Ord[i]])
 }
+ST_Ori <- AR_Ori
+for (i in 36:56) {
+  ST_Ori[i] <- AR_Ori[ST_Ord[i]]*-1
+}
 ST_lenreg <- ST_End - ST_Beg +1
-ST_Data <- cbind(ST_SReg, ST_Beg, ST_End)
+ST_Data <- cbind(ST_SReg, ST_Beg, ST_End, ST_Ori)
 write.csv(ST_Data, file ="output/ST_Coordinates.csv")
 #
 #Pikes Peak Arrangement
@@ -84,7 +109,11 @@ for (i in 2:nsreg) {
   PP_End[i] <- PP_End[i-1]+ST_lenreg[PP_Ord[i]]
   PP_SReg[i] <- c(ST_SReg[PP_Ord[i]])
 }
-PP_Data <- cbind(PP_SReg, PP_Beg, PP_End)
+PP_Ori <- ST_Ori
+for (i in 11:55) {
+  PP_Ori[i] <- ST_Ori[PP_Ord[i]]*-1
+}
+PP_Data <- cbind(PP_SReg, PP_Beg, PP_End, PP_Ori)
 write.csv(PP_Data, file ="output/PP_Coordinates.csv")
 #
 #Hypothetical Arrangement - Ancestral Arrangement
@@ -103,8 +132,12 @@ for (i in 2:nsreg) {
   HY_End[i] <- HY_End[i-1]+ST_lenreg[HY_Ord[i]]
   HY_SReg[i] <- c(ST_SReg[HY_Ord[i]])
 }
+HY_Ori <- ST_Ori
+for (i in 56:65) {
+  HY_Ori[i] <- ST_Ori[HY_Ord[i]]*-1
+}
 HY_lenreg <- HY_End - HY_Beg +1
-HY_Data <- cbind(HY_SReg, HY_Beg, HY_End)
+HY_Data <- cbind(HY_SReg, HY_Beg, HY_End, HY_Ori)
 write.csv(HY_Data, file ="output/HY_Coordinates.csv")
 #
 #Santa Cruz Arrangement
@@ -123,8 +156,12 @@ for (i in 2:nsreg) {
   SC_End[i] <- SC_End[i-1]+HY_lenreg[SC_Ord[i]]
   SC_SReg[i] <- c(HY_SReg[SC_Ord[i]])
 }
+SC_Ori <- HY_Ori
+for (i in 28:56) {
+  SC_Ori[i] <- HY_Ori[SC_Ord[i]]*-1
+}
 SC_lenreg <- SC_End - SC_Beg +1
-SC_Data <- cbind(SC_SReg, SC_Beg, SC_End)
+SC_Data <- cbind(SC_SReg, SC_Beg, SC_End, SC_Ori)
 write.csv(SC_Data, file ="output/SC_Coordinates.csv")
 #
 #Cuernavaca Arrangement
@@ -143,7 +180,11 @@ for (i in 2:nsreg) {
   CU_End[i] <- CU_End[i-1]+SC_lenreg[CU_Ord[i]]
   CU_SReg[i] <- c(SC_SReg[CU_Ord[i]])
 }
-CU_Data <- cbind(CU_SReg, CU_Beg, CU_End)
+CU_Ori <- SC_Ori
+for (i in 8:51) {
+  CU_Ori[i] <- SC_Ori[CU_Ord[i]]*-1
+}
+CU_Data <- cbind(CU_SReg, CU_Beg, CU_End,CU_Ori)
 write.csv(CU_Data, file ="output/CU_Coordinates.csv")
 #
 #Chiricahua Arrangement
@@ -162,7 +203,11 @@ for (i in 2:nsreg) {
   CH_End[i] <- CH_End[i-1]+SC_lenreg[CH_Ord[i]]
   CH_SReg[i] <- c(SC_SReg[CH_Ord[i]])
 }
-CH_Data <- cbind(CH_SReg, CH_Beg, CH_End)
+CH_Ori <- SC_Ori
+for (i in 46:62) {
+  CH_Ori[i] <- SC_Ori[CH_Ord[i]]*-1
+}
+CH_Data <- cbind(CH_SReg, CH_Beg, CH_End, CH_Ori)
 write.csv(CH_Data, file ="output/CH_Coordinates.csv")
 #
 #Tree Line Arrangement
@@ -181,16 +226,25 @@ for (i in 2:nsreg) {
   TL_End[i] <- TL_End[i-1]+SC_lenreg[TL_Ord[i]]
   TL_SReg[i] <- c(SC_SReg[TL_Ord[i]])
 }
-TL_Data <- cbind(TL_SReg, TL_Beg, TL_End)
+TL_Ori <- SC_Ori
+for (i in 34:57) {
+  TL_Ori[i] <- SC_Ori[TL_Ord[i]]*-1
+}
+TL_Data <- cbind(TL_SReg, TL_Beg, TL_End, TL_Ori)
 write.csv(TL_Data, file ="output/TL_Coordinates.csv")
 ```
 
 
 ## Concatenate DnaSP Gene Conversion Data
-This PERL script takes data from DnaSP output from the Gene Conversion analysis and creates:  
-1. GeneConversion_Tracts.tsv - a table separated value file with conversion tracts  
-2. GeneConversion_Stats.tsv - a table separated value file with summary statistics on conversion tracts  
-3. GeneConversion_Sites_Regxx.tsv for the xx regions [1-14]  
+This PERL script aggregates data from the DnaSP Gene Conversion analysis.  
+
+Input file in the data folder  
+1. file_list.fof, is a list of 1,095 file names that were output from DNASP.  The list of names reflects 15 pairwise comparisons of six gene arrangements (AR, ST, PP, CH, TL, CU) for 73 subregions [01a-14h] of 181,398 – 440,325 nucleotide lengths.  
+
+Output files in the data folder  
+1. GeneConversion_Tracts.tsv, is a tab separated values file that lists all gene conversion tracts from all pairwise comparisons of the six gene arrangements. Columns [GC_Event, number of the event; GC_File, filename with the data; GC_Strain, strain with the gene conversion event; GC_Beg, first nucleotide of the gene conversion tract; GC_End, last nucleotide of the gene conversion tract; GC_Len, length of the gene conversion tract].  
+2. GeneConversion_Stats.tsv, is a tab separated values file that lists the statistics for the 15 pairwise comparisons of the six gene arrangements for the 73 regions for a total of 1,095 analyses.  Columns [GC_File, filename with the data; GC_Pop1, gene arrangement 1; GC_Pop1_No, number of gene arrangement 1; GC_Pop2, gene arrangement 2; GC_Pop2_No, number of gene arrangement 2; GC_Tract_No, number of gene conversion tracts; GC_Sites, number of informative sites; GC_Psi, mean value of Psi for the informative sites; GC_Phi, mean value of Phi for the observed data].  
+3. GeneConversion_Sites_Regxx.tsv,is a tab separated values file that lists the informative sites used in the gene conversion detection analysis for the xx Region. Columns [GC_File, filename with the data; GC_Pop1, gene arrangement 1; GC_Pop2, gene arrangement 2; GC_SiteNo, nucleotide position of the informative site in the data subset; GC_SitePsi, value of Psi for the informative site; TotalSites, total number of nucleotide sites in the subregion].    
 4. GeneConversion_Check.tsv - a table separated value file that checks the input file name matches the contents of the file  
 
 ```{perl, Concatenate DnaSP Gene Conversion Data, engine.path = 'C:\\perl64\\bin\\perl.exe'}
@@ -213,48 +267,79 @@ my($file,$filein,$fileout,$fileinp,$filec,$inputID,$regi,$analID);
 #$analID  - "Reg_Arr1_Arr2" from within the analysis file
 #
 #
-my ($i,$line,@GCtsites,$GCtsites,@GCpop1,$GCpop1,@GCp1sam,$GCp1sam,@GCpop2,$GCpop2,@GCp2sam,$GCp2sam);
+my ($i,$line,$count,@GCtsites,$GCtsites,@GCpop1,$GCpop1,@GCp1sam,$GCp1sam,@GCpop2,$GCpop2,@GCp2sam,$GCp2sam);
 my (@GCNo,$GCNo,@GCint,$GCint,@GCstr,$GCstr,@GCcoor,$GCcoor,@GClen,$GClen);
 my (@GCpsi,$GCpsi,$GCtlen,@GCsites,$GCsites,@GCSiteI,$GCSiteI,$rego,$reg);
+my ($StrainID,$Don_Arr,$Rec_Arr,$Event,$Tract);
 chdir("data");
+$count=0;
 open (FILE_LIST, "file_list.fof");
 #
+#
 #OUTPUT1 - GeneConversion_Tracts.tsv
+#
 #is a tab separated values file that lists all gene conversion tracts from
-#all pairwise comparisons of the six gene arrangements. Columns [GC_Event, number of
-#the event; GC_File, filename with the data; GC_Strain, strain with the gene conversion
-#event; GC_Beg, first nucleotide of the gene conversion tract; GC_End, last
-#nucleotide of the gene conversion tract; GC_Len, length of the gene conversion tract]. 
+#all pairwise comparisons of the six gene arrangements.
+#
+#Columns
+#1. GC_Event, number of #the event;
+#2. GC_File, filename with the data;
+#3. GC_Strain, strain with the gene conversion event;
+#4. GC_Beg, first nucleotide of the gene conversion tract;
+#5. GC_End, last #nucleotide of the gene conversion tract;
+#6. GC_Len, length of the gene conversion tract;
+#7. Event, region Arr1 Arr2;
+#8. Tract, Tract name  
 #
 open(OUTPUT1, ">GeneConversion_Tracts.tsv");
-print OUTPUT1 "GC_Event\tGC_File\tGC_Strain\tGC_Beg\tGC_End\tGC_Len\n";
+print OUTPUT1 "Order\tGC_Event\tGC_File\tSubRegion\tRegion\tDon_Arr\tRec_Arr\tGC_Strain\tGC_Beg\tGC_End\tGC_Len\tEvent\tTract\n";
 #
 #OUTPUT2 - GeneConversion_Stats.tsv
+#
 #is a tab separated values file that lists the statistics for the 15 pairwise
 #comparisons of the six gene arrangements for the 73 regions for a total of 1,095
-#analyses.  Columns [GC_File, filename with the data; GC_Pop1, gene arrangement 1;
-#GC_Pop1_No, number of gene arrangement 1; GC_Pop2, gene arrangement 2; GC_Pop2_No,
-#number of gene arrangement 2; GC_Tract_No, number of gene conversion tracts; GC_Sites,
-#number of informative sites; GC_Psi, mean value of Psi for the informative sites;
-#GC_Phi, mean value of Phi for the observed data].
+#analyses.
+#
+#Columns
+#1. GC_File, filename with the data;
+#2. GC_Psi, mean value of Psi for the informative sites;
+#3. GC_Pop1, gene arrangement 1;
+#4. GC_Pop1_No, number of gene arrangement 1;
+#5. GC_Pop2, gene arrangement 2;
+#6. GC_Pop2_No, number of gene arrangement 2;
+#7. GC_Tract_No, number of gene conversion tracts;
+#8. GC_Sites, number of informative sites; 
+#9. GC_Phi, mean value of Phi for the observed data.
 #
 open(OUTPUT2, ">GeneConversion_Stats.tsv");
-print OUTPUT2 "GC_File\tGC_Pop1\tGC_Pop1_No\tGC_Pop2\tGC_Pop2_No\tGC_Tract_No\tGC_Sites\tGC_Psi\tGC_Phi\n";
+print OUTPUT2 "GC_File\tGC_Psi\tGC_Pop1\tGC_Pop1_No\tGC_Pop2\tGC_Pop2_No\tGC_Tract_No\tGC_Sites\tGC_Phi\n";
+#
 #
 #OUTPUT3 - GeneConversion_Sites_Regxx.tsv
+#
 #is a tab separated values file that lists the informative sites used in the
-#gene conversion detection analysis. Columns [GC_File, filename with the data; GC_Pop1,
-#gene arrangement 1; GC_Pop2, gene arrangement 2; GC_SiteNo, nucleotide position of the
-#informative site in the data subset; GC_SitePsi, value of Psi for the informative site;
-#GC_TotalSites, total number of nucleotide sites].
+#gene conversion detection analysis.
+#
+#Columns
+#1. GC_File, filename with the data;
+#2. GC_Pop1, gene arrangement 1;
+#3. GC_Pop2, gene arrangement 2;
+#4. GC_SiteNo, nucleotide position of the informative site in the data subset;
+#5. GC_SitePsi, value of Psi for the informative site;
+#6. GC_TotalSites, total number of nucleotide sites.
 #
 #
 #Output4 - GeneConversion_Check.tsv
+#
 #is a tab separated values file that lists the name of the file, the name
 #of the Input Data File on line 8, the first arrangement and the second arrangement
-#[Input_File,Analysis_File,Check], where Input_File and Analysis_File are of the form "Subregion_ARR1_ARR2"
-#This file checks to make sure the name of the file matches with the contents of
+#GeneConversion_Check determines if the name of the file matches with the contents of
 #the file.
+#
+#Columns
+#1. Input_File, in the form "Subregion_ARR1_ARR2";
+#2. Analysis_File, in the form "Subregion_ARR1_ARR2";
+#3. Check, does $InputID eq $AnalID? [Match or No Match]
 #
 open(OUTPUT4, ">GeneConversion_Check.tsv");
 print OUTPUT4 "Input_File\tAnalysis_File\tCheck\n";
@@ -293,22 +378,36 @@ while ($file = <FILE_LIST>) {
     #Line 12 has Population 1 Name
     $line=<QUERY>;    
     chop($line);
+    #
     #$GCpop1[1] - Population 1 Name 
+    #
     @GCpop1 = split(': ', $line);
+    #
     #Line 13 has Population 1 Sample Size
+    #
     $line=<QUERY>;
     chop($line);
+    #
     #$GCp1sam[1] - Population 1 Sample Size 
+    #
     @GCp1sam = split(': ', $line);
+    #
     #Line 14 has Population 2 Name
+    #
     $line=<QUERY>;
     chop($line);
+    #
     #$GCpop2[1] - Population 2 Name
+    #
     @GCpop2 = split(': ', $line);
+    #
     #Line 15 has Population 2 Sample Size
+    #
     $line=<QUERY>;
     chop($line);
+    #
     #$GCp2sam[1] - Population 2 Sample Size  
+    #
     @GCp2sam = split(': ', $line);
     $analID=join "",$regi,"_",$GCpop1[1],"_",$GCpop2[1];
     if($inputID eq $analID){
@@ -326,11 +425,21 @@ while ($file = <FILE_LIST>) {
     @GCNo = split(':', $line);
     #Read the conversion version tract information for the $GCNo[] Gene Conversion Tracts
     for($i=1; $i<=$GCNo[1]; $i++) {
+        $count=$count+1;
         $line=<QUERY>;
         chop($line);
         @GCint = split(':', $line);
         #$GCstr[0] - Strain name
         @GCstr = split(' ', $GCint[1]);
+        $StrainID=substr $GCstr[0], 0, 2;
+        if($StrainID eq $GCpop1[1]) {
+        $Don_Arr=$GCpop2[1];
+        $Rec_Arr=$GCpop1[1];
+        }
+        else {
+        $Don_Arr=$GCpop1[1];
+        $Rec_Arr=$GCpop2[1];
+        }
         #$GCcoor[0] - Beginning coordinate
         #$GCcoor[1] - End coordinate
         @GCcoor = split('-', $GCint[2]);
@@ -338,8 +447,10 @@ while ($file = <FILE_LIST>) {
         chop($line);
         #$GClen[1] - Gene conversion tract length
         @GClen = split(':', $line);
-        print OUTPUT1 "$i\t$file\t$GCstr[0]\t$GCcoor[0]\t$GCcoor[1]\t$GClen[1]\n";
-        }
+        $Event=join "",$Don_Arr,"_",$Rec_Arr;
+        $Tract=join "",$regi,"_",$GCstr[0],"_",$GCcoor[0],"_",$GCcoor[1];
+        print OUTPUT1 "$count\t$i\t$file\t$regi\t$reg\t$Don_Arr\t$Rec_Arr\t$GCstr[0]\t$GCcoor[0]\t$GCcoor[1]\t$GClen[1]\t$Event\t$Tract\n";
+    }
     $line=<QUERY>;
     #Line 17 + (2 x $GCNo[]) + 1 has the estimate of Psi
     $line=<QUERY>;
@@ -353,10 +464,10 @@ while ($file = <FILE_LIST>) {
     chop($line);
     #$GCsites[1] - Number of informative sites
     @GCsites = split(':', $line);
-    print OUTPUT2 "$file\t";
+    print OUTPUT2 "$file\t$GCpsi[1]\t";
     print OUTPUT2 "$GCpop1[1]\t$GCp1sam[1]\t";
     print OUTPUT2 "$GCpop2[1]\t$GCp2sam[1]\t";
-    print OUTPUT2 "$GCNo[1]\t$GCsites[1]\t$GCpsi[1]\t$GCtlen\n";
+    print OUTPUT2 "$GCNo[1]\t$GCsites[1]\t$GCtlen\n";
     for($i=1; $i<=5; $i++) {
         $line=<QUERY>     
         }
@@ -377,4 +488,108 @@ while ($file = <FILE_LIST>) {
     close(OUTPUT3);
 }
 ```
+  
+## Merge Psi and Filter Data  
+This R code chunk merges the estimate of Psi with the GC_Tracts Data. A new variable "GC_Tract_Count" that counts 
+the number of pairwise comparisons that identify a particular conversion tract in the "Tract" variable. The table 
+is sorted by "Tract". A new variable "exclude" is added so that only a single instance of each "Tract" is used.
+Non-Redundant tracts are identified with "N" while redundant tracts are identified with "Y" in "exclude".  
 
+Input files in the data folder  
+1. GeneConversion_Stats.tsv  
+2. GeneConversion_Tracts.tsv  
+
+Output files in the data folder  
+1. Tract_Count.csv - number of pairwise comparisons identifying each gene conversion Tract  
+2. GeneConversion_Tracts_Processed.csv - updated gene conversion Tract file with "Psi" and "exclude" added  
+3. GC_List.txt - List of the unique gene conversion tracts with columns [Don_Arr, Rec_Arr, Region, GC_Len, Psi, exclude]  
+
+```{r, Merge Psi amd Filter Data }
+library(qdapTools)
+library(plyr)
+library(ggplot2)
+options(scipen =999)
+GC_Stat <- read.delim("data/GeneConversion_Stats.tsv", header = TRUE, sep = "\t")
+GC_Tracts <- read.delim("data/GeneConversion_Tracts.tsv", header = TRUE, sep = "\t")
+#
+#Create a new column in GC_Tracts with the Psi value lookup from GC_Stat
+#
+GC_Tracts$Psi <- lookup(GC_Tracts$GC_File, GC_Stat[, 1:2])
+#
+#Count the number of duplicate gene conversion tracts
+#
+GC_Tract_Count <- count(GC_Tracts, 'Tract')
+write.csv(GC_Tract_Count, file ="data/Tract_Count.csv")
+#
+#Create a new column in GC_Tracts with the number of tract counts
+#
+GC_Tracts$Tract_Count <- lookup(GC_Tracts$Tract, GC_Tract_Count[, 1:2])
+#
+#Sort GC_Tracts by the Tract name into a new table called sorted
+#
+sorted <- GC_Tracts[order(GC_Tracts$Tract),]
+#
+#Create a new column in sorted called exclude with "N" or "Y" for excluding the tract
+#
+sorted$exclude[1] <- c("N")
+NROW(sorted)
+for (i in 2:NROW(sorted)) {
+  if(sorted$Tract[i] == sorted$Tract[i-1]) {
+  sorted$exclude[i] <- c("Y")
+  }
+  else{
+  sorted$exclude[i] <- c("N")
+  }
+}
+#
+#Sort sorted by "exclude", "Rec_Arr", and "Don_Arr" into a new table called sorted_new
+#
+sorted_new <- sorted[order(sorted$exclude, sorted$Rec_Arr, sorted$Don_Arr),]
+write.csv(sorted_new, file ="data/GeneConversion_Tracts_Processed.csv", row.names = FALSE)
+GC_List <- cbind(sorted_new$Don_Arr, sorted_new$Rec_Arr, sorted_new$Region, sorted_new$GC_Len, sorted_new$Psi, sorted_new$exclude)
+colnames(GC_List) <- c("Donor_Arr", "Recipient_Arr", "Region", "Length", "Psi", "exclude")
+write.table(GC_List, file ="data/GC_List.txt", row.names = FALSE, quote = FALSE, sep = '\t')
+#
+#Summary statistics for gene conversion length
+#
+summary(GC_Tracts$GC_Len)
+#
+#Plot histogram of the log10 of gene conversion lengths
+#
+Log_GCLen <-log10(GC_Tracts$GC_Len)
+hist(Log_GCLen)
+#
+#Plot the transition matrix for donor to recipient gene conversion events
+#
+ggplot(GC_Tracts, aes(y=Don_Arr, x=Rec_Arr, color = Rec_Arr)) +
+  geom_count(alpha = 1) +
+  labs(title = "Gene Conversion Transitions",
+       x = "Recipient Arrangement",
+       y = "Donor Arrangement",
+       size = "")
+```
+
+## NG Gene Conversion Tract Format File  
+Purpose: This program sets up text files with observed gene conversion tract length data for the Fortran program NG Betran GC ML, which estimates actual gene conversion parameters (BETRAN et al. 1997).  
+
+Source: Fortran, NG_Gene_Conversion_Tract_Format_File.f in code folder  
+
+Input files in the data folder  
+1. GC_List.txt, is a tab separated value file with all gene conversion tracts for each inversion pair. This file was generated in the Merge Psi and Filter Data chunk of GeneConversionInversion.Rmarkdown file.  There are six columns [Donor Arrangement, Recipient Arrangement, Syntenic Block Region, Observed Gene Conversion Tract Length, Psi, exclude] and each row is the data for a particular tract length.  
+
+Output files in the data folder  
+1. GCT_arr1_arr2_reg.txt, where arr1 is the donor arrangement, arr2 is the recipient arrangement, and reg is the syntenic block region.  First line of the file is the number of gene conversion tracts for the donor and recipient arrangement and the region.  Remaining lines have two columns [Observed Gene Conversion Tract Length, Psi Value].  
+2. GC.fof, is a file of filenames that contain gene conversion data.  The filenames are (GCT_arr1_arr2_reg.txt” where arr1 is the donor arrangement, arr2 is the recipient arrangement, and reg is the syntenic block region.
+
+## NG Betran GC ML  
+This program estimates maximum likelihood gene conversion parameters from a list of observed gene conversion tract lengths from DNASP output.  We used the maximum likelihood approach of (BETRAN et al. 1997) using equations 4, 6, and 8.  The second derivative of the likelihood equation was used to estimate the asymptotic variance.  The value of phi is iterated from 0.98 to 1.00 in increments of 0.000001. Files are opened sequentially and analyzed to estimate gene conversion parameters.  The files were created in the NG Gene Conversion Tract Format File above.  
+
+Source: Fortran, NG_Betran_GC_ML.f in code folder  
+
+Input in the data folder
+1. GC.fof, is a file of filenames that contain gene conversion data.  
+2. GCT_arr1_arr2_reg.txt, where arr1 is the donor arrangement, arr2 is the recipient arrangement, and reg is the syntenic block region.  First line of the file is the number of gene conversion tracts for the donor and recipient arrangement and the region. Remaining lines have two columns [Observed Gene Conversion Tract Length, Psi Value]).  
+
+Output in the data folder  
+1. GC_LH_arr1_arr2_reg.csv, is a comma separated value file that outputs the columns [Iteration, Phi, value of the phi that is being used to estimate the likelihood value; lnL, likelihood value estimated based on the value of phi].
+2. A_Gene_Conv_Estimate.txt, is a text file with the output of the maximum likelihood analysis.  Each line represents the values from each file of gene conversion data.  The Columns in the file are [Don, donor arrangement; Rec, recipient arrangement; Reg, syntenic block region 1-14; Phi, maximum likelihood estimate of phi; LowLim(N), lower limit on the gene conversion tract length based on maximum likelihood estimate of phi minus two times the standard deviation; Expect(N), gene conversion tract length based on the maximum likelihood estimate of phi (1/(1-phi)); UpLim(N), upper limit on the gene conversion tract length based on maximum likelihood estimate of phi plus two times the standard deviation; Prob(UE), probability of an undetected gene conversion event equation 9 in Betran et al. (1997); Obs#(CT), observed number of conversion tracts (k) from DNASP; Exp#(CT), expected number of conversion tracts = k/P(L>=2) see page 95 column 1 in Betran et al. (1997); Prob(TS), probability of a transferred site = (Exp#(CT) x Expect(N))/(number of sequences x number of nucleotides) see page 95 column 2 in Betran et al (1997)].  
