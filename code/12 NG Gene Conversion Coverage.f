@@ -11,6 +11,7 @@ c-----Source: NG Gene Conversion Coverage.f
 c
       integer ib,ic,id,ie,ig
       integer chr(19787792),rchr(19787792),igchr(19787792)
+      integer ochr(19787792)
       integer nbeg(35000),nend(35000),nib,nie
       integer nr,rbeg(14),rend(14),rcov(14),rcov2(14)
       integer gcov(2,14),ggc,ggcs
@@ -93,11 +94,15 @@ c-----ntex(i)  - Number of the ith transcript exon
 c-----ntb(i)   - First nucleotide of the ith transcript exon
 c-----nte(i)   - Last nucleotide of the ith transcript exon
 c-----ts(i)    - Status of the ith transcript exon [1=non-outlier; 2=outlier]
+c-----ochr(i)  - array whose elements label nucleotides as either non-outlier (1) or outlier (2)
 c      
       open(unit=1,file='GC_'//arr//'_Transcripts_Exons_List.tsv')
       ntr=0
 150   ntr=ntr+1
       read(1,*,end=200) gname(ntr),ntex(ntr),ntb(ntr),nte(ntr),ts(ntr)
+      do i=ntb(ntr),nte(ntr)
+      ochr(i)=ts(ntr)
+      end do
       goto 150
 200   close(unit=1)
       ntr=ntr-1
@@ -310,7 +315,7 @@ c
       goto 450 
 500   close(unit=1)
       open(unit=1,file='GC_'//arr//'_Intergenic_List.tsv')
-      write(1,'("IG_Region",a1,"Beg",a1,"End")') t,t
+      write(1,'("IG_Region",a1,"Beg",a1,"End",a1,"Outlier")') t,t,t
 c
 c-----Initiate variables
 c-----nr    - number of the region
@@ -335,8 +340,15 @@ c-----Nucleotide is CDS and transition to CDS
 c-----Switch iflag to CDS value (1)
 c-----Output the intergenic interval
 c
+c-----ochr(nib-1) and ochr(nie+1) generate an outlier status variable
+c-----where 11 indicates that the intergenic region is flanked by non-outlier genes
+c-----      12 indicates that the intergenic region is flanked by a non-outlier to the left and a outlier to the right
+c-----      21 indicates that the intergenic region is flanked by a outlier to the left and a non-outlier to the right
+c-----      22 indicates that the intergenic region is flanked by outlier 
+c
       iflag=1
-      write(1,'("Region_",i4.4,a1,i8,a1,i8)') nr,t,nib,t,nie
+      write(1,'(\"Region_",i4.4,a1,i8,a1,i8)') nr,t,nib,t,nie
+      write(1,'(a1,i1,i1)') t,ochr(nib-1),ochr(nie+1)
       elseif(igchr(i).eq.0.and.iflag.eq.1) then
 c
 c-----Nucleotide is intergenic and transition to intergenic
@@ -352,19 +364,21 @@ c
 c
 c-----Output the last intergenic interval
 c
-      write(1,'("Region_",i4.4,a1,i8,a1,i8)') nr,t,nib,t,nie
+      write(1,'(\"Region_",i4.4,a1,i8,a1,i8)') nr,t,nib,t,nie
+      write(1,'(a1,i1,i1)') t,ochr(nib-1),ochr(nie+1)
       close(unit=1)
 c
 c-----Reopen file with intergenic coordinates and input regions and coordinates
 c
 c-----Reuse variables gname(i), ntb(i), and nte(i)
 c-----Reuse variables ggc (coverage), ggcs (sites)
+c-----ts(i) is the outlier status of the intergenic region taking the values (11,12,21, or 22) see above
 c
       open(unit=1,file='GC_'//arr//'_Intergenic_List.tsv')
       read(1,'(1x)')
       ntr=0
 550   ntr=ntr+1
-      read(1,*,end=600) gname(ntr),ntb(ntr),nte(ntr)
+      read(1,*,end=600) gname(ntr),ntb(ntr),nte(ntr),ts(ntr)
       goto 550
 600   close(unit=1)
       ntr=ntr-1
@@ -373,7 +387,7 @@ c-----Estimate gene conversion coverage in intergenic regions
 c
       open(unit=1,file='GC_'//arr//'_Intergenic_Coverage.tsv')
       write(1,'(\"Gene_Name",a1,"Beg",a1,"End",a1,"Region")') t,t,t
-      write(1,'(a1,"Nuc",a1,"Mean_Cov")') t,t   
+      write(1,'(a1,"Nuc",a1,"Outlier",a1,"Mean_Cov")') t,t,t   
       do i=1,ntr
       ggc=0
       ggcs=0
@@ -386,7 +400,7 @@ c-----Output the results for the intergenic interval
 c
       write(1,'(\a11,a1,i10,a1,i10)') gname(i),t,ntb(i),t,nte(i)
       write(1,'(\a1,i2,a1,i10)') t,rchr(ntb(i)),t,ggcs
-      write(1,'(a1,f9.3)') t,float(ggc)/float(ggcs)
+      write(1,'(a1,i2,a1,f9.3)') t,ts(i),t,float(ggc)/float(ggcs)
       end do      
       close(unit=1)
       stop
